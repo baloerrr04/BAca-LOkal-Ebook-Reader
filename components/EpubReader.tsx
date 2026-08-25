@@ -208,7 +208,7 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
       setTimeout(() => {
         renditionRef.current?.next()
         setIsAnimating(false)
-        setSlideDir(null)
+        setSlideDir('none')
       }, 200)
     } else {
       renditionRef.current.next()
@@ -223,7 +223,7 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
       setTimeout(() => {
         renditionRef.current?.prev()
         setIsAnimating(false)
-        setSlideDir(null)
+        setSlideDir('none')
       }, 200)
     } else {
       renditionRef.current.prev()
