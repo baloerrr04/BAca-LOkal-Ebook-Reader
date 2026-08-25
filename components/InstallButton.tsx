@@ -7,11 +7,20 @@ export default function InstallButton() {
   const [isInstallable, setIsInstallable] = useState(false)
 
   useEffect(() => {
+    // Check if the event already fired globally before this component mounted
+    if (typeof window !== 'undefined' && (window as any).globalDeferredPrompt) {
+      setDeferredPrompt((window as any).globalDeferredPrompt)
+      setIsInstallable(true)
+    }
+
     const handleBeforeInstallPrompt = (e: Event) => {
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault()
       // Stash the event so it can be triggered later.
       setDeferredPrompt(e)
+      if (typeof window !== 'undefined') {
+        (window as any).globalDeferredPrompt = e
+      }
       // Update UI notify the user they can install the PWA
       setIsInstallable(true)
     }
@@ -22,6 +31,9 @@ export default function InstallButton() {
     window.addEventListener('appinstalled', () => {
       setIsInstallable(false)
       setDeferredPrompt(null)
+      if (typeof window !== 'undefined') {
+        (window as any).globalDeferredPrompt = null
+      }
       console.log('PWA was installed')
     })
 
@@ -39,6 +51,9 @@ export default function InstallButton() {
     console.log(`User response to the install prompt: ${outcome}`)
     // We've used the prompt, and can't use it again, throw it away
     setDeferredPrompt(null)
+    if (typeof window !== 'undefined') {
+      (window as any).globalDeferredPrompt = null
+    }
     setIsInstallable(false)
   }
 
@@ -46,10 +61,10 @@ export default function InstallButton() {
     return (
       <button 
         className="btn btn-outline btn-primary btn-sm w-full max-w-xs gap-2 opacity-50 cursor-not-allowed" 
-        title="Tombol ini akan aktif jika browser Anda mendukung PWA dan Service Worker sudah berjalan."
+        title="Otomatis aktif jika browser Anda mendukung PWA"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
         Unduh Aplikasi
       </button>
@@ -57,14 +72,14 @@ export default function InstallButton() {
   }
 
   return (
-    <button
+    <button 
       onClick={handleInstallClick}
-      className="btn btn-outline btn-primary btn-sm w-full max-w-xs gap-2 hover:scale-[1.02] transition-transform"
+      className="btn btn-outline btn-primary btn-sm w-full max-w-xs gap-2 shadow-sm hover:shadow-md"
     >
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
       </svg>
-      Download App
+      Unduh Aplikasi
     </button>
   )
 }

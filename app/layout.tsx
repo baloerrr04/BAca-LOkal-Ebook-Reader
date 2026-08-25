@@ -24,6 +24,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Roboto:ital,wght@0,400;0,500;1,400&family=Source+Code+Pro&display=swap" rel="stylesheet" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.globalDeferredPrompt = null;
+              window.addEventListener('beforeinstallprompt', function(e) {
+                e.preventDefault();
+                window.globalDeferredPrompt = e;
+              });
+            `,
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col font-[var(--font-jakarta)]">{children}</body>
     </html>
