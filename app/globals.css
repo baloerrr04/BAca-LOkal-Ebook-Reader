@@ -1,26 +1,59 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ── DaisyUI Plugin ───────────────────────────── */
+@plugin "daisyui" {
+  themes: minimalis --default;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Custom Theme: Minimalis ──────────────────── */
+@plugin "daisyui/theme" {
+  name: "minimalis";
+  default: true;
+  --color-base-100: oklch(0.995 0.001 264);
+  --color-base-200: oklch(0.968 0.003 264.542);
+  --color-base-300: oklch(0.929 0.006 264.531);
+  --color-base-content: oklch(0.372 0.023 264.364);
+  --color-primary: oklch(0.546 0.143 264);
+  --color-primary-content: oklch(1 0 0);
+  --color-secondary: oklch(0.604 0.022 261.325);
+  --color-secondary-content: oklch(0.208 0.016 265.755);
+  --color-accent: oklch(0.75 0.12 200);
+  --color-accent-content: oklch(1 0 0);
+  --color-neutral: oklch(0.985 0.002 247.858);
+  --color-neutral-content: oklch(0.372 0.023 264.364);
+  --color-info: oklch(0.714 0.169 231.767);
+  --color-success: oklch(0.765 0.177 163.223);
+  --color-warning: oklch(0.82 0.165 84.429);
+  --color-error: oklch(0.704 0.144 25.723);
+  --rounded-box: 1.25rem;
+  --rounded-btn: 0.75rem;
+  --rounded-badge: 1rem;
+  --tab-radius: 0.75rem;
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+  --btn-focus-scale: 0.97;
+  --border-btn: 1px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth global transitions */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Nicer scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0.8 0.01 264);
+  border-radius: 999px;
 }
