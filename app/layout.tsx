@@ -11,6 +11,12 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Baloer — BAca LOkal Ebook Reader",
   description: "Aplikasi pembaca EPUB lokal. Tampilan nyaman, baca makin asyik, tanpa akun, privat, dan ringan.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Baloer",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -32,6 +38,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 e.preventDefault();
                 window.globalDeferredPrompt = e;
               });
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('ServiceWorker registration successful with scope: ', reg.scope);
+                  }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                  });
+                });
+              }
             `,
           }}
         />
