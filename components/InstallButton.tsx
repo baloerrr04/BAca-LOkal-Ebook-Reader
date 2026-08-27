@@ -5,8 +5,12 @@ import React, { useEffect, useState } from 'react'
 export default function InstallButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [isInstallable, setIsInstallable] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(false)
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsStandalone(window.matchMedia('(display-mode: standalone)').matches)
+    }
     // Check if the event already fired globally before this component mounted
     if (typeof window !== 'undefined' && (window as any).globalDeferredPrompt) {
       setDeferredPrompt((window as any).globalDeferredPrompt)
@@ -55,6 +59,10 @@ export default function InstallButton() {
       (window as any).globalDeferredPrompt = null
     }
     setIsInstallable(false)
+  }
+
+  if (isStandalone) {
+    return null
   }
 
   if (!isInstallable) {
