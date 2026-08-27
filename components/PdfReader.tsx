@@ -6,6 +6,7 @@ import { db } from '@/utils/db'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { useThemeStore } from '@/store/themeStore'
 import ThemePanel from '@/components/ThemePanel'
+import { convertPdfToEpub } from '@/utils/pdfToEpub'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
@@ -31,8 +32,38 @@ export default function PdfReader({ bookId }: { bookId: string }) {
   const isDark = isColorDark(theme.bgColor)
   
   const [file, setFile] = useState<File | null>(null)
+  const [bookTitle, setBookTitle] = useState<string>('Buku PDF')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  const [isConverting, setIsConverting] = useState(false)
+  const [conversionProgress, setConversionProgress] = useState<{ current: number, total: number, message?: string }>({ current: 0, total: 0, message: '' })
+
+  const handleConvert = async () => {
+    try {
+      const cached = await db.books.get(bookId)
+      if (!cached || !cached.epubData) throw new Error('File tidak ditemukan')
+      
+      setIsConverting(true)
+      const epubBuffer = await convertPdfToEpub(cached.epubData, cached.title || 'Converted PDF', (current, total, statusText) => {
+        setConversionProgress({ current, total, message: statusText || 'Mengonversi...' })
+      })
+
+      // Update IndexedDB to replace PDF with EPUB
+      await db.books.put({
+        ...cached,
+        epubData: epubBuffer,
+        fileType: 'epub',
+        cachedAt: Date.now()
+      })
+
+      // Reload page to switch to EPUB reader
+      window.location.reload()
+    } catch (err: any) {
+      alert('Gagal mengonversi PDF: ' + (err.message || 'Error tidak diketahui'))
+      setIsConverting(false)
+    }
+  }
   
   const [numPages, setNumPages] = useState<number>(0)
   const [pageNumber, setPageNumber] = useState<number>(1)
@@ -126,15 +157,26 @@ export default function PdfReader({ bookId }: { bookId: string }) {
           </button>
         </div>
 
-        <button
-          onClick={togglePanel}
-          className="btn btn-ghost btn-sm btn-circle"
-          style={{ color: theme.textColor }}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleConvert()}
+            disabled={isConverting}
+            className="btn btn-primary btn-xs sm:btn-sm rounded-full gap-1.5 shadow-sm text-xs"
+            title="Konversi dokumen PDF ini ke format EPUB agar bisa diubah ukuran tulisan, jenis font, dan tema warna."
+          >
+            <span>⚡ Konversi ke EPUB</span>
+          </button>
+
+          <button
+            onClick={togglePanel}
+            className="btn btn-ghost btn-sm btn-circle"
+            style={{ color: theme.textColor }}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Viewer Area */}
@@ -213,6 +255,34 @@ export default function PdfReader({ bookId }: { bookId: string }) {
 
       {/* Theme Options Panel */}
       <ThemePanel />
+
+      {/* Conversion Progress Modal */}
+      {isConverting && (
+        <div className="modal modal-open z-50">
+          <div className="modal-box rounded-2xl text-center space-y-4 max-w-sm">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
+              <svg className="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
+            <h3 className="font-bold text-lg text-base-content">Mengonversi PDF...</h3>
+            <p className="text-sm font-medium text-primary animate-pulse">
+              {conversionProgress.message || 'Mengekstrak teks halaman...'}
+            </p>
+            <p className="text-xs text-secondary">
+              Halaman <b>{conversionProgress.current}</b> dari <b>{conversionProgress.total}</b>
+            </p>
+            <progress 
+              className="progress progress-primary w-full" 
+              value={conversionProgress.current} 
+              max={conversionProgress.total || 100}
+            ></progress>
+            <p className="text-[11px] text-secondary/60">
+              Pengalaman membaca serba bisa & kustomisasi font segera siap! ✨
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -9,6 +9,7 @@ interface BookMetadata {
   title: string
   author: string
   uploaded_at: string
+  fileType?: string
 }
 
 export default function LibraryClient() {
@@ -26,6 +27,7 @@ export default function LibraryClient() {
           title: b.title || 'Unknown Title',
           author: b.author || 'Unknown Author',
           uploaded_at: new Date(b.cachedAt).toISOString(),
+          fileType: b.fileType || 'epub'
         }))
         mappedBooks.sort((a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime())
         setLocalBooks(mappedBooks)
