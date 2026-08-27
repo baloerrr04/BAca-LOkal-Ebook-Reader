@@ -31,6 +31,8 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
   const [slideDir, setSlideDir] = useState<'left' | 'right' | 'none'>('none')
   const [title, setTitle] = useState<string>('Reading')
   const [translation, setTranslation] = useState<TranslationData | null>(null)
+  const [currentPage, setCurrentPage] = useState<number>(0)
+  const [totalPages, setTotalPages] = useState<number>(0)
 
   const { theme, isPanelOpen, togglePanel } = useThemeStore()
   const prevThemeRef = useRef<ThemeConfig>(theme)
@@ -96,6 +98,17 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
 
     applyThemeToRendition(rendition, currentTheme)
     await rendition.display()
+
+    // Track page info on navigation
+    rendition.on('relocated', (location: any) => {
+      try {
+        const displayed = location?.start?.displayed
+        if (displayed) {
+          setCurrentPage(displayed.page ?? 0)
+          setTotalPages(displayed.total ?? 0)
+        }
+      } catch (_) {}
+    })
 
     // Keyboard navigation
     rendition.on('keyup', (e: KeyboardEvent) => {
@@ -238,11 +251,17 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
 
   // Swipe gesture support
   const touchStartX = useRef<number>(0)
-  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX }
+  const touchStartY = useRef<number>(0)
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
   const onTouchEnd = (e: React.TouchEvent) => {
-    const diff = touchStartX.current - e.changedTouches[0].clientX
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) handleNext()
+    const diffX = touchStartX.current - e.changedTouches[0].clientX
+    const diffY = touchStartY.current - e.changedTouches[0].clientY
+    // Only trigger horizontal swipe if horizontal movement is dominant
+    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+      if (diffX > 0) handleNext()
       else handlePrev()
     }
   }
@@ -345,11 +364,11 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
           </div>
         )}
 
-        {/* Prev button (paginated only) */}
+        {/* Prev button — desktop only (mobile uses swipe) */}
         {theme.readingMode === 'paginated' && (
           <button
             onClick={handlePrev}
-            className="absolute left-0 top-0 bottom-0 w-14 z-10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity group"
+            className="hidden sm:flex absolute left-0 top-0 bottom-0 w-14 z-10 items-center justify-center opacity-0 hover:opacity-100 transition-opacity group"
           >
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center shadow-md border border-black/10 group-hover:scale-110 transition-transform"
@@ -406,11 +425,11 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
           </div>
         </div>
 
-        {/* Next button (paginated only) */}
+        {/* Next button — desktop only (mobile uses swipe) */}
         {theme.readingMode === 'paginated' && (
           <button
             onClick={handleNext}
-            className="absolute right-0 top-0 bottom-0 w-14 z-10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity group"
+            className="hidden sm:flex absolute right-0 top-0 bottom-0 w-14 z-10 items-center justify-center opacity-0 hover:opacity-100 transition-opacity group"
           >
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center shadow-md border border-black/10 group-hover:scale-110 transition-transform"
@@ -427,20 +446,47 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
       {/* ── Bottom Nav Bar (paginated) ────────────────────────── */}
       {theme.readingMode === 'paginated' && (
         <div
-          className="h-12 shrink-0 flex items-center justify-center gap-6 border-t border-black/10"
-          style={{ backgroundColor: theme.bgColor }}
+          className="shrink-0 flex items-center justify-between px-4 sm:px-8 border-t border-black/10"
+          style={{ backgroundColor: theme.bgColor, paddingTop: '10px', paddingBottom: '14px' }}
         >
+          {/* Prev button */}
           <button
             onClick={handlePrev}
-            className="px-5 py-1.5 rounded-full text-sm font-medium border border-black/15 hover:bg-black/5 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-black/15 hover:bg-black/5 active:bg-black/10 transition-colors min-w-[80px] justify-center select-none"
+            style={{ color: theme.textColor }}
           >
-            ← Prev
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Prev</span>
           </button>
+
+          {/* Page indicator */}
+          <div className="flex flex-col items-center gap-0.5">
+            {totalPages > 0 ? (
+              <>
+                <span className="text-sm font-bold" style={{ color: theme.textColor }}>
+                  {currentPage}
+                  <span className="font-normal opacity-40 mx-1">/</span>
+                  {totalPages}
+                </span>
+                <span className="text-[10px] opacity-35 font-medium tracking-wide uppercase" style={{ color: theme.textColor }}>Halaman</span>
+              </>
+            ) : (
+              <span className="text-xs opacity-30" style={{ color: theme.textColor }}>· · ·</span>
+            )}
+          </div>
+
+          {/* Next button */}
           <button
             onClick={handleNext}
-            className="px-5 py-1.5 rounded-full text-sm font-medium border border-black/15 hover:bg-black/5 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-black/15 hover:bg-black/5 active:bg-black/10 transition-colors min-w-[80px] justify-center select-none"
+            style={{ color: theme.textColor }}
           >
-            Next →
+            <span>Next</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       )}
