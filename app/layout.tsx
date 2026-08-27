@@ -12,6 +12,14 @@ export const metadata: Metadata = {
   title: "Baloer — BAca LOkal Ebook Reader",
   description: "Aplikasi pembaca EPUB lokal. Tampilan nyaman, baca makin asyik, tanpa akun, privat, dan ringan.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    shortcut: '/icons/icon.svg',
+    apple: '/icons/icon-512x512.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

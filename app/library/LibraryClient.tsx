@@ -180,18 +180,41 @@ export default function LibraryClient() {
           </div>
         </div>
 
-        {/* Info Banner for PDF Limitations */}
-        <div className="w-full bg-base-200/50 border border-base-300/60 rounded-2xl p-4 flex gap-3 shadow-sm transition-all hover:bg-base-200/80">
-          <div className="text-secondary mt-0.5">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-semibold text-base-content mb-1">Sekilas Info</h3>
-            <p className="text-xs text-base-content/80 leading-relaxed">
-              Jika Anda mengunggah file <b>PDF</b>, harap diingat bahwa tata letaknya kaku (jenis huruf dan ukurannya tidak dapat diubah). 
-              Untuk pengalaman membaca yang jauh lebih nyaman, interaktif, dan dapat disesuaikan sesuka hati, kami sangat menyarankan Anda 
-              membaca buku dengan <b>format EPUB</b>.
-            </p>
+        {/* Info Banner for EPUB Customization vs PDF Limitations */}
+        <div className="w-full bg-gradient-to-r from-primary/10 via-base-200/80 to-base-200/60 border border-primary/25 rounded-2xl p-5 shadow-sm transition-all hover:shadow-md relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex flex-col sm:flex-row gap-4 items-start relative z-10">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center shrink-0">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="badge badge-primary badge-sm font-semibold tracking-wide uppercase px-2 py-1">💡 Sekilas Info</span>
+                <h3 className="text-sm font-bold text-base-content">Format Mana yang Sebaiknya Anda Pilih?</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                {/* EPUB Advantages */}
+                <div className="bg-base-100/80 border border-primary/20 rounded-xl p-3.5 space-y-1">
+                  <div className="flex items-center gap-2 text-primary font-bold text-xs">
+                    <span>✨ Format EPUB (Sangat Direkomendasikan)</span>
+                  </div>
+                  <p className="text-xs text-base-content/90 leading-relaxed">
+                    <b>Sepenuhnya Dapat Dikustomisasi!</b> Bebas mengubah ukuran tulisan, jenis font, jarak antarbaris, tema warna (Gelap, Sepia, Terang), hingga navigasi geser/swipe.
+                  </p>
+                </div>
+                {/* PDF Limitations */}
+                <div className="bg-base-100/50 border border-base-300/50 rounded-xl p-3.5 space-y-1">
+                  <div className="flex items-center gap-2 text-secondary font-bold text-xs">
+                    <span>📄 Format PDF (Saat Ini Terbatas)</span>
+                  </div>
+                  <p className="text-xs text-base-content/70 leading-relaxed">
+                    Tata letak kaku seperti dokumen cetak. Ukuran & jenis font <b>belum bisa dikustomisasi</b> karena mempertahankan format asli dokumen.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
