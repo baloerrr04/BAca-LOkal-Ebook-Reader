@@ -29,7 +29,7 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
   const [error, setError] = useState<string | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const [slideDir, setSlideDir] = useState<'left' | 'right' | 'none'>('none')
-  const [title, setTitle] = useState<string>('Reading')
+  const [title, setTitle] = useState<string>('Membaca')
   const [translation, setTranslation] = useState<TranslationData | null>(null)
   const [currentPage, setCurrentPage] = useState<number>(0)
   const [totalPages, setTotalPages] = useState<number>(0)
@@ -63,6 +63,10 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
     rendition.themes.register('custom', buildThemeCSS(t))
     rendition.themes.select('custom')
   }, [buildThemeCSS])
+
+  // Use refs for swipe handlers to avoid stale closures in epubjs events
+  const handleNextRef = useRef<() => void>(() => {})
+  const handlePrevRef = useRef<() => void>(() => {})
 
   const initBook = useCallback(async (epubData: ArrayBuffer | Blob, currentTheme: ThemeConfig) => {
     if (!viewerRef.current) return
@@ -145,16 +149,34 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
         if (data.result) {
           setTranslation(prev => prev && prev.text === text ? { ...prev, translatedText: data.result, loading: false } : prev)
         } else {
-          setTranslation(prev => prev && prev.text === text ? { ...prev, translatedText: 'Translation failed', loading: false } : prev)
+          setTranslation(prev => prev && prev.text === text ? { ...prev, translatedText: 'Terjemahan gagal', loading: false } : prev)
         }
       } catch (err) {
-        setTranslation(prev => prev ? { ...prev, translatedText: 'Error', loading: false } : null)
+        setTranslation(prev => prev ? { ...prev, translatedText: 'Terjadi kesalahan', loading: false } : null)
       }
     })
 
-    // Dismiss popup when user starts interacting again (not on click, which fires after selection)
+    // Dismiss popup when user starts interacting again
     rendition.on('mousedown', () => setTranslation(null))
-    rendition.on('touchstart', () => setTranslation(null))
+    
+    // Handle touch inside the iframe for swipe
+    let startX = 0
+    let startY = 0
+    rendition.on('touchstart', (e: TouchEvent) => {
+      setTranslation(null)
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+    })
+    
+    rendition.on('touchend', (e: TouchEvent) => {
+      const diffX = startX - e.changedTouches[0].clientX
+      const diffY = startY - e.changedTouches[0].clientY
+      
+      if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+        if (diffX > 0) handleNextRef.current()
+        else handlePrevRef.current()
+      }
+    })
   }, [applyThemeToRendition])
 
   // Load book from cache or Supabase
@@ -171,16 +193,16 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
 
         if (cached) {
           epubData = cached.epubData
-          setTitle(cached.title || 'Reading')
+          setTitle(cached.title || 'Membaca')
         } else {
-           throw new Error('Book not found on this device.')
+           throw new Error('Buku tidak ditemukan di perangkat ini.')
         }
 
         if (!cancelled && epubData) {
           await initBook(epubData, theme)
         }
       } catch (err: any) {
-        if (!cancelled) setError(err.message ?? 'Failed to load book')
+        if (!cancelled) setError(err.message ?? 'Gagal memuat buku')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -249,22 +271,10 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
     }
   }, [applyThemeToRendition])
 
-  // Swipe gesture support
-  const touchStartX = useRef<number>(0)
-  const touchStartY = useRef<number>(0)
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX
-    touchStartY.current = e.touches[0].clientY
-  }
-  const onTouchEnd = (e: React.TouchEvent) => {
-    const diffX = touchStartX.current - e.changedTouches[0].clientX
-    const diffY = touchStartY.current - e.changedTouches[0].clientY
-    // Only trigger horizontal swipe if horizontal movement is dominant
-    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
-      if (diffX > 0) handleNext()
-      else handlePrev()
-    }
-  }
+  useEffect(() => {
+    handleNextRef.current = handleNext
+    handlePrevRef.current = handlePrev
+  }, [handleNext, handlePrev])
 
   const slideClass = slideDir === 'left'
     ? 'translate-x-[-20px] opacity-0'
@@ -289,7 +299,7 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Library
+          Koleksi
         </Link>
 
         <p className="text-sm font-semibold opacity-70 truncate max-w-[40%] text-center">
@@ -304,7 +314,7 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
               useThemeStore.getState().setTheme({ readingMode: next })
             }}
             className="p-2 rounded-lg opacity-60 hover:opacity-100 transition-opacity"
-            title={theme.readingMode === 'paginated' ? 'Switch to Scroll' : 'Switch to Pages'}
+            title={theme.readingMode === 'paginated' ? 'Ubah ke mode Gulir' : 'Ubah ke mode Halaman'}
           >
             {theme.readingMode === 'paginated' ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,7 +331,7 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
           <button
             onClick={togglePanel}
             className={`p-2 rounded-lg transition-all ${isPanelOpen ? 'bg-black/10 opacity-100' : 'opacity-60 hover:opacity-100'}`}
-            title="Reading Settings"
+            title="Pengaturan Membaca"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -333,8 +343,6 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
       {/* ── Reader Area ───────────────────────────────────────── */}
       <div
         className="flex-1 relative flex overflow-hidden"
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
       >
         {/* Loading overlay */}
         {loading && (
@@ -358,7 +366,7 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
         {error && (
           <div className="absolute inset-0 flex items-center justify-center z-20 p-8">
             <div className="max-w-md text-center space-y-3 bg-red-50 border border-red-200 rounded-xl p-6">
-              <p className="text-red-600 font-bold">Failed to load book</p>
+              <p className="text-red-600 font-bold">Gagal memuat buku</p>
               <p className="text-red-500 text-sm">{error}</p>
             </div>
           </div>
@@ -458,7 +466,7 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            <span>Prev</span>
+            <span>Kembali</span>
           </button>
 
           {/* Page indicator */}
@@ -483,7 +491,7 @@ export default function EpubReader({ bookId }: EpubReaderProps) {
             className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-black/15 hover:bg-black/5 active:bg-black/10 transition-colors min-w-[80px] justify-center select-none"
             style={{ color: theme.textColor }}
           >
-            <span>Next</span>
+            <span>Lanjut</span>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>

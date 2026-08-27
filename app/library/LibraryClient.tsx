@@ -64,12 +64,12 @@ export default function LibraryClient() {
     try {
       const formData = new FormData(e.currentTarget)
       const file = formData.get('file') as File
-      if (!file) throw new Error('No file selected')
+      if (!file) throw new Error('Tidak ada file yang dipilih')
       const newBook = await processFile(file)
       setLocalBooks(prev => [newBook, ...prev])
       ;(e.target as HTMLFormElement).reset()
     } catch (err: any) {
-      setError(err.message || 'Failed to open file')
+      setError(err.message || 'Gagal membuka file')
     } finally {
       setIsUploading(false)
     }
@@ -86,7 +86,7 @@ export default function LibraryClient() {
       const newBook = await processFile(file)
       setLocalBooks(prev => [newBook, ...prev])
     } catch (err: any) {
-      setError(err.message || 'Failed to open file')
+      setError(err.message || 'Gagal membuka file')
     } finally {
       setIsUploading(false)
     }
@@ -121,13 +121,13 @@ export default function LibraryClient() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
-            <h1 className="text-xl font-bold text-base-content tracking-tight">My Library</h1>
+            <h1 className="text-xl font-bold text-base-content tracking-tight">Koleksiku</h1>
           </div>
           <Link href="/" className="btn btn-ghost btn-sm rounded-xl gap-1.5 text-secondary hover:text-primary">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            Home
+            Beranda
           </Link>
         </div>
       </div>
@@ -166,9 +166,9 @@ export default function LibraryClient() {
                 className="btn btn-primary btn-sm rounded-xl px-6 w-full sm:w-auto shadow-sm"
               >
                 {isUploading ? (
-                  <><span className="loading loading-spinner loading-xs"></span> Loading</>
+                  <><span className="loading loading-spinner loading-xs"></span> Memuat</>
                 ) : (
-                  '📖 Open'
+                  '📖 Buka'
                 )}
               </button>
             </form>
@@ -198,7 +198,7 @@ export default function LibraryClient() {
         {/* Book Grid */}
         <div>
           <h2 className="text-lg font-bold text-base-content mb-5 flex items-center gap-2">
-            <span>📚</span> Recently Opened
+            <span>📚</span> Terakhir Dibuka
             {localBooks.length > 0 && (
               <span className="badge badge-sm badge-ghost rounded-lg font-medium">{localBooks.length}</span>
             )}

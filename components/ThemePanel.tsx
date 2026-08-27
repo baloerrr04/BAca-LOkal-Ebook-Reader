@@ -73,7 +73,7 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
       >
         <div className="p-5 space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-lg tracking-tight">Reading Settings</h2>
+            <h2 className="font-bold text-lg tracking-tight">Pengaturan Membaca</h2>
             <button
               onClick={() => setPanelOpen(false)}
               className="p-1 rounded-full opacity-60 hover:opacity-100 transition-opacity"
@@ -86,7 +86,7 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
           {/* Color Presets */}
           <section>
             <label className="block text-xs font-semibold uppercase tracking-widest opacity-50 mb-3">
-              Theme
+              Tema
             </label>
             <div className="grid grid-cols-5 gap-2">
               {(Object.keys(PRESETS) as Array<keyof typeof PRESETS>).map((key) => (
@@ -123,11 +123,11 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
           {/* Custom Colors */}
           <section>
             <label className="block text-xs font-semibold uppercase tracking-widest opacity-50 mb-3">
-              Custom Colors
+              Warna Kustom
             </label>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm">Background</span>
+                <span className="text-sm">Latar Belakang</span>
                 <input
                   type="color"
                   value={theme.bgColor}
@@ -136,7 +136,7 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm">Text Color</span>
+                <span className="text-sm">Warna Teks</span>
                 <input
                   type="color"
                   value={theme.textColor}
@@ -153,7 +153,7 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
           {/* Font Size */}
           <section>
             <label className="block text-xs font-semibold uppercase tracking-widest opacity-50 mb-3">
-              Font Size: {theme.fontSize}%
+              Ukuran Huruf: {theme.fontSize}%
             </label>
             <div className="flex items-center gap-3">
               <span className="text-sm opacity-60">A</span>
@@ -186,7 +186,7 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
           {/* Font Family */}
           <section>
             <label className="block text-xs font-semibold uppercase tracking-widest opacity-50 mb-3">
-              Font
+              Jenis Huruf
             </label>
             <div className="space-y-1">
               {FONT_OPTIONS.map((opt) => (
@@ -209,7 +209,7 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
           {/* Line Height */}
           <section>
             <label className="block text-xs font-semibold uppercase tracking-widest opacity-50 mb-3">
-              Line Spacing: {theme.lineHeight.toFixed(1)}
+              Jarak Baris: {theme.lineHeight.toFixed(1)}
             </label>
             <input
               type="range"
@@ -221,8 +221,8 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
               className="w-full accent-current"
             />
             <div className="flex justify-between text-xs opacity-40 mt-1">
-              <span>Compact</span>
-              <span>Spacious</span>
+              <span>Rapat</span>
+              <span>Renggang</span>
             </div>
           </section>
 
@@ -232,7 +232,7 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
           {/* Reading Mode */}
           <section>
             <label className="block text-xs font-semibold uppercase tracking-widest opacity-50 mb-3">
-              Reading Mode
+              Mode Membaca
             </label>
             <div className="grid grid-cols-2 gap-2">
               {(['paginated', 'scrolled'] as ReadingMode[]).map((mode) => (
@@ -250,14 +250,14 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
-                      <span>Pages</span>
+                      <span>Halaman</span>
                     </>
                   ) : (
                     <>
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
                       </svg>
-                      <span>Scroll</span>
+                      <span>Gulir</span>
                     </>
                   )}
                 </button>
@@ -265,7 +265,7 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
             </div>
             {theme.readingMode === 'paginated' && (
               <p className="text-xs opacity-50 mt-2 text-center">
-                Swipe or use arrow buttons to flip pages
+                Usap atau gunakan tombol panah untuk membalik halaman
               </p>
             )}
           </section>
@@ -275,36 +275,36 @@ export default function ThemePanel({ onThemeChange }: ThemePanelProps = {}) {
           {/* Theme Copas (Export/Import) */}
           <section>
             <label className="block text-xs font-semibold uppercase tracking-widest opacity-50 mb-3">
-              Copas Theme (Export/Import)
+              Salin Tema (Ekspor/Impor)
             </label>
             <div className="flex gap-2">
               <button
                 onClick={() => {
                   const themeStr = JSON.stringify(theme)
                   navigator.clipboard.writeText(themeStr)
-                  alert('Theme copied to clipboard!')
+                  alert('Tema disalin ke papan klip!')
                 }}
                 className="flex-1 py-2 bg-black/10 hover:bg-black/20 text-xs font-bold rounded-lg transition-colors"
               >
-                Copy Theme
+                Salin Tema
               </button>
               <button
                 onClick={() => {
-                  const input = prompt('Paste your theme JSON here:')
+                  const input = prompt('Tempel JSON tema Anda di sini:')
                   if (!input) return
                   try {
                     const parsed = JSON.parse(input)
                     if (parsed && typeof parsed === 'object') {
                       handleChange(parsed)
-                      alert('Theme applied successfully!')
+                      alert('Tema berhasil diterapkan!')
                     }
                   } catch (e) {
-                    alert('Invalid theme format')
+                    alert('Format tema tidak valid')
                   }
                 }}
                 className="flex-1 py-2 bg-black/10 hover:bg-black/20 text-xs font-bold rounded-lg transition-colors"
               >
-                Paste Theme
+                Tempel Tema
               </button>
             </div>
           </section>
